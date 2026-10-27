@@ -21,7 +21,7 @@ Flask-вебзастосунок для ознайомлення з персон
 
 ```
 app.py          # Flask: веб-маршрути, REST API, обробники помилок
-api_client.py   # запити до Rick and Morty API та перетворення даних
+api_service.py   # запити до Rick and Morty API та перетворення даних
 database.py     # схема SQLite, валідація, CRUD (python database.py - ініціалізація БД)
 analytics.py    # підрахунки та графіки matplotlib
 templates/      # HTML-шаблони (Jinja2 + Bootstrap)

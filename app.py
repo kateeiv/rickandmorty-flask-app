@@ -4,9 +4,9 @@ import os
 from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
 
 import analytics
-import api_client
+import api_service
 import database
-from api_client import ExternalAPIError, InvalidParametersError, NoResultsError
+from api_service import ExternalAPIError, InvalidParametersError, NoResultsError
 from database import DuplicateError, ValidationError
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -60,7 +60,7 @@ def register_web_routes(app):
             return render_template("index.html", **context)
 
         try:
-            data = api_client.search_characters(page=request.args.get("page", 1), **fields)
+            data = api_service.search_characters(page=request.args.get("page", 1), **fields)
         except InvalidParametersError as exc:
             flash(str(exc), "warning")
             return render_template("index.html", **context), 400
@@ -85,7 +85,7 @@ def register_web_routes(app):
         if not target.startswith("/"):  # захист від open redirect
             target = url_for("index")
         try:
-            character = api_client.get_character(external_id)
+            character = api_service.get_character(external_id)
             database.add_character(character)
             flash(f"«{character['name']}» збережено до колекції.", "success")
         except NoResultsError:
@@ -200,7 +200,7 @@ def register_api_routes(app):
             return _json_error("Очікується JSON-об'єкт (Content-Type: application/json).", 400)
         try:
             if set(data) == {"external_id"}:
-                data = api_client.get_character(data["external_id"])
+                data = api_service.get_character(data["external_id"])
             character = database.add_character(data)
         except ValidationError as exc:
             return _json_error("Помилка валідації.", 400, exc.errors)

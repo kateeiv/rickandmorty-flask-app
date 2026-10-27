@@ -2,9 +2,12 @@
 
 Документація: https://rickandmortyapi.com/documentation
 """
+import os
+
 import requests
 
-BASE_URL = "https://rickandmortyapi.com/api"
+# URL можна перевизначити змінною середовища (наприклад, для перевірки недоступності API)
+BASE_URL = os.environ.get("RICKMORTY_API_URL", "https://rickandmortyapi.com/api")
 TIMEOUT = 10  # секунд
 
 # Допустимі значення фільтрів зовнішнього API

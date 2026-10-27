@@ -146,16 +146,51 @@ def validate_character(data, partial=False):
 
 
 # --------------------------------------------------------------------- CRUD
+# Усі SQL-запити нижче - СТАТИЧНІ рядки. Значення від користувача передаються
+# ВИКЛЮЧНО як параметри (?), f-рядки та конкатенація з введеними даними не використовуються.
+INSERT_SQL = (
+    "INSERT INTO characters (external_id, name, status, species, type, gender, "
+    "origin, location, image, episode_count, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+)
+INSERT_DEFAULTS = {"type": "", "gender": "unknown", "origin": "unknown", "location": "unknown",
+                   "image": "", "episode_count": 0, "note": ""}
+
+# COALESCE(?, поле): якщо нове значення не передано (None) - поле залишається без змін
+UPDATE_SQL = (
+    "UPDATE characters SET name = COALESCE(?, name), status = COALESCE(?, status), "
+    "species = COALESCE(?, species), type = COALESCE(?, type), gender = COALESCE(?, gender), "
+    "origin = COALESCE(?, origin), location = COALESCE(?, location), image = COALESCE(?, image), "
+    "episode_count = COALESCE(?, episode_count), note = COALESCE(?, note) WHERE id = ?"
+)
+UPDATE_FIELDS = ("name", "status", "species", "type", "gender", "origin", "location",
+                 "image", "episode_count", "note")
+
+# Локальний пошук/фільтрація виконується засобами SQL. Порожній параметр ('') вимикає умову.
+SELECT_SQL = r"""
+SELECT * FROM characters
+WHERE (? = '' OR name LIKE ? ESCAPE '\' OR origin LIKE ? ESCAPE '\'
+            OR location LIKE ? ESCAPE '\' OR note LIKE ? ESCAPE '\')
+  AND (? = '' OR status  = ? COLLATE NOCASE)
+  AND (? = '' OR species = ? COLLATE NOCASE)
+  AND (? = '' OR gender  = ? COLLATE NOCASE)
+"""
+# ORDER BY не можна параметризувати, тому всі варіанти - готові константи з білого списку;
+# користувацьке значення лише ОБИРАЄ один із них (інакше - ValidationError).
+ORDER_CLAUSES = {}
+for _field in SORT_FIELDS:
+    ORDER_CLAUSES[(_field, "asc")] = " ORDER BY " + _field + " ASC, id ASC"
+    ORDER_CLAUSES[(_field, "desc")] = " ORDER BY " + _field + " DESC, id ASC"
+
+
 def add_character(data):
     """CREATE. Повертає збережений запис (dict). Кидає ValidationError / DuplicateError."""
-    clean = validate_character(data)
-    columns = ", ".join(clean)
-    placeholders = ", ".join("?" for _ in clean)
+    clean = {**INSERT_DEFAULTS, **validate_character(data)}
+    values = [clean["external_id"], clean["name"], clean["status"], clean["species"],
+              clean["type"], clean["gender"], clean["origin"], clean["location"],
+              clean["image"], clean["episode_count"], clean["note"]]
     with closing(get_connection()) as conn:
         try:
-            cur = conn.execute(
-                f"INSERT INTO characters ({columns}) VALUES ({placeholders})", list(clean.values())
-            )
+            cur = conn.execute(INSERT_SQL, values)
             conn.commit()
         except sqlite3.IntegrityError as exc:
             if "external_id" in str(exc):
@@ -177,29 +212,18 @@ def _escape_like(text):
 
 def list_characters(q="", status="", species="", gender="", sort="id", order="asc",
                     limit=None, offset=0):
-    """READ (список) з локальним пошуком, фільтрацією та сортуванням."""
-    where, params = [], []
-    if q and q.strip():
-        like = f"%{_escape_like(q.strip())}%"
-        where.append("(name LIKE ? ESCAPE '\\' OR origin LIKE ? ESCAPE '\\' "
-                     "OR location LIKE ? ESCAPE '\\' OR note LIKE ? ESCAPE '\\')")
-        params += [like] * 4
-    for column, value in (("status", status), ("species", species), ("gender", gender)):
-        if value and value.strip():
-            where.append(f"{column} = ? COLLATE NOCASE")
-            params.append(value.strip())
-    if sort not in SORT_FIELDS:
-        raise ValidationError([f"Некоректне поле сортування. Допустимо: {', '.join(SORT_FIELDS)}."])
-    if order not in ("asc", "desc"):
+    """READ (список) з локальним пошуком, фільтрацією та сортуванням - усе на боці SQL."""
+    if (sort, order) not in ORDER_CLAUSES:
+        if sort not in SORT_FIELDS:
+            raise ValidationError(["Некоректне поле сортування. Допустимо: " + ", ".join(SORT_FIELDS) + "."])
         raise ValidationError(["Некоректний порядок сортування. Допустимо: asc, desc."])
 
-    sql = "SELECT * FROM characters"
-    if where:
-        sql += " WHERE " + " AND ".join(where)
-    sql += f" ORDER BY {sort} {order.upper()}, id ASC"  # sort/order - з білого списку
-    if limit is not None:
-        sql += " LIMIT ? OFFSET ?"
-        params += [int(limit), int(offset)]
+    q = (q or "").strip()
+    like = "%" + _escape_like(q) + "%"
+    status, species, gender = (status or "").strip(), (species or "").strip(), (gender or "").strip()
+    params = [q, like, like, like, like, status, status, species, species, gender, gender,
+              -1 if limit is None else int(limit), int(offset)]  # LIMIT -1 = без обмеження
+    sql = SELECT_SQL + ORDER_CLAUSES[(sort, order)] + " LIMIT ? OFFSET ?"
     with closing(get_connection()) as conn:
         return [dict(r) for r in conn.execute(sql, params).fetchall()]
 
@@ -211,11 +235,10 @@ def update_character(char_id, data, partial=True):
     clean = validate_character(data, partial=partial)
     clean.pop("external_id", None)  # зовнішній ідентифікатор незмінний
     if clean:
-        assignments = ", ".join(f"{k} = ?" for k in clean)
+        values = [clean.get(field) for field in UPDATE_FIELDS] + [char_id]
         with closing(get_connection()) as conn:
             try:
-                conn.execute(f"UPDATE characters SET {assignments} WHERE id = ?",
-                             list(clean.values()) + [char_id])
+                conn.execute(UPDATE_SQL, values)
                 conn.commit()
             except sqlite3.IntegrityError as exc:
                 raise ValidationError([f"Порушення обмежень цілісності: {exc}"]) from exc

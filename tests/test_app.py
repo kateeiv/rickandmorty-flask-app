@@ -7,7 +7,7 @@ import requests
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import api_client  # noqa: E402
+import api_service  # noqa: E402
 import database  # noqa: E402
 from app import create_app  # noqa: E402
 
@@ -43,7 +43,7 @@ def fake_api(monkeypatch):
         if url.endswith("/character") and params.get("name", "").lower() == "rick":
             return FakeResponse(200, {"info": {"count": 1, "pages": 1}, "results": [RICK_RAW]})
         return FakeResponse(404, {"error": "There is nothing here"})
-    monkeypatch.setattr(api_client.requests, "get", fake_get)
+    monkeypatch.setattr(api_service.requests, "get", fake_get)
 
 
 def raise_error(exc):
@@ -82,13 +82,13 @@ def test_search_no_results(client, fake_api):
 
 
 def test_external_api_down(client, monkeypatch):
-    monkeypatch.setattr(api_client.requests, "get", raise_error(requests.exceptions.ConnectionError()))
+    monkeypatch.setattr(api_service.requests, "get", raise_error(requests.exceptions.ConnectionError()))
     r = client.get("/?name=rick")
     assert r.status_code == 503 and "Не вдалося" in r.get_data(as_text=True)
 
 
 def test_external_api_timeout(client, monkeypatch):
-    monkeypatch.setattr(api_client.requests, "get", raise_error(requests.exceptions.Timeout()))
+    monkeypatch.setattr(api_service.requests, "get", raise_error(requests.exceptions.Timeout()))
     assert client.get("/?name=rick").status_code == 503
 
 
@@ -158,7 +158,7 @@ def test_api_import_by_external_id(client, fake_api):
 
 
 def test_api_import_when_external_down(client, monkeypatch):
-    monkeypatch.setattr(api_client.requests, "get", raise_error(requests.exceptions.ConnectionError()))
+    monkeypatch.setattr(api_service.requests, "get", raise_error(requests.exceptions.ConnectionError()))
     assert client.post("/api/characters", json={"external_id": 1}).status_code == 503
 
 
@@ -188,3 +188,12 @@ def test_database_constraints(client):
                                 "image": "javascript:alert(1)"})
     assert database.get_character(12345) is None
     assert database.update_character(12345, {"name": "x"}) is None
+
+
+def test_local_search_treats_wildcards_literally(client):
+    database.add_character({"external_id": 1, "name": "Rick", "status": "Alive", "species": "Human"})
+    assert database.list_characters(q="%") == []
+    assert database.list_characters(q="' OR 1=1 --") == []
+    assert len(database.list_characters(q="ric")) == 1
+    assert len(database.list_characters(limit=1, offset=0)) == 1
+    assert database.list_characters(limit=1, offset=1) == []
