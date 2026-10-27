@@ -1,0 +1,23 @@
+<div class="card h-100 char-card">
+  <img src="{{ c.image }}" class="card-img-top" alt="{{ c.name }}" loading="lazy">
+  <div class="card-body">
+    <h5 class="card-title">{{ c.name }}</h5>
+    <span class="badge text-bg-{{ c.status|status_class }} mb-2">{{ c.status }}</span>
+    <ul class="list-unstyled small mb-0">
+      <li><i class="bi bi-person"></i> <strong>Вид:</strong> {{ c.species }}{% if c.type %} ({{ c.type }}){% endif %}</li>
+      <li><i class="bi bi-gender-ambiguous"></i> <strong>Стать:</strong> {{ c.gender }}</li>
+      <li><i class="bi bi-globe"></i> <strong>Походження:</strong> {{ c.origin }}</li>
+      <li><i class="bi bi-geo-alt"></i> <strong>Локація:</strong> {{ c.location }}</li>
+    </ul>
+  </div>
+  <div class="card-footer bg-transparent">
+    {% if c.external_id in saved_ids %}
+      <button class="btn btn-outline-secondary btn-sm w-100" disabled><i class="bi bi-check2"></i> Збережено</button>
+    {% else %}
+      <form method="post" action="{{ url_for('save', external_id=c.external_id) }}">
+        <input type="hidden" name="next" value="{{ request.full_path.rstrip('?') }}">
+        <button class="btn btn-success btn-sm w-100"><i class="bi bi-bookmark-plus"></i> Зберегти</button>
+      </form>
+    {% endif %}
+  </div>
+</div>

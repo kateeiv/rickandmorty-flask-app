@@ -1,0 +1,248 @@
+﻿{
+    "variable":  [
+                     {
+                         "key":  "base_url",
+                         "value":  "http://127.0.0.1:5000"
+                     }
+                 ],
+    "info":  {
+                 "name":  "Rick and Morty - власний REST API",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+             },
+    "item":  [
+                 {
+                     "name":  "Список (усі)",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "Пошук + фільтр + сортування",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters?q=rick\u0026status=Alive\u0026sort=name\u0026order=desc\u0026limit=10"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "Імпорт із зовнішнього API (external_id=1)",
+                     "request":  {
+                                     "body":  {
+                                                  "raw":  "{\"external_id\": 1}",
+                                                  "mode":  "raw"
+                                              },
+                                     "method":  "POST",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "Створити вручну",
+                     "request":  {
+                                     "body":  {
+                                                  "raw":  "{\"external_id\": 9001, \"name\": \"Test Morty\", \"status\": \"Alive\", \"species\": \"Human\", \"gender\": \"Male\"}",
+                                                  "mode":  "raw"
+                                              },
+                                     "method":  "POST",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "Отримати за id",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters/1"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "PATCH (часткове оновлення)",
+                     "request":  {
+                                     "body":  {
+                                                  "raw":  "{\"note\": \"Улюблений персонаж\"}",
+                                                  "mode":  "raw"
+                                              },
+                                     "method":  "PATCH",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters/1"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "PUT (повне оновлення)",
+                     "request":  {
+                                     "body":  {
+                                                  "raw":  "{\"name\": \"Rick Sanchez\", \"status\": \"Alive\", \"species\": \"Human\"}",
+                                                  "mode":  "raw"
+                                              },
+                                     "method":  "PUT",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters/1"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "Видалити",
+                     "request":  {
+                                     "method":  "DELETE",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters/1"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "Статистика",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/stats"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "ПОМИЛКА 404: неіснуючий id",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters/99999"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "ПОМИЛКА 400: невалідні дані",
+                     "request":  {
+                                     "body":  {
+                                                  "raw":  "{\"external_id\": 5, \"name\": \"\", \"status\": \"Zombie\"}",
+                                                  "mode":  "raw"
+                                              },
+                                     "method":  "POST",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "ПОМИЛКА 409: дублікат",
+                     "request":  {
+                                     "body":  {
+                                                  "raw":  "{\"external_id\": 1}",
+                                                  "mode":  "raw"
+                                              },
+                                     "method":  "POST",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "ПОМИЛКА 400: некоректне сортування",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters?sort=bogus"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 },
+                 {
+                     "name":  "ПОМИЛКА 405: DELETE на колекцію",
+                     "request":  {
+                                     "method":  "DELETE",
+                                     "url":  {
+                                                 "raw":  "{{base_url}}/api/characters"
+                                             },
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ]
+                                 }
+                 }
+             ]
+}

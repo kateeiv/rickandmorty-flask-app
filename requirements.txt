@@ -1,0 +1,4 @@
+Flask>=3.0
+requests>=2.31
+matplotlib>=3.8
+pytest>=8.0

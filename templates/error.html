@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Помилка {{ code }}{% endblock %}
+{% block content %}
+<div class="text-center py-5">
+  <div class="display-1 portal-text fw-bold">{{ code }}</div>
+  <p class="lead">{{ message }}</p>
+  <a class="btn btn-success" href="{{ url_for('index') }}"><i class="bi bi-house"></i> На головну</a>
+  <a class="btn btn-outline-secondary" href="{{ url_for('saved') }}">До колекції</a>
+</div>
+{% endblock %}

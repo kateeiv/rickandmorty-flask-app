@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="hero text-center mb-4">
+  <h1 class="portal-text display-5 fw-bold">Каталог персонажів</h1>
+  <p class="text-secondary">Шукайте героїв Rick and Morty та зберігайте улюблених до своєї колекції</p>
+</div>
+
+<form class="card card-body mb-4" method="get" action="{{ url_for('index') }}">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label" for="name">Ім'я</label>
+      <input class="form-control" id="name" name="name" value="{{ fields.name }}" placeholder="Наприклад, Rick">
+    </div>
+    <div class="col-md-2 col-6">
+      <label class="form-label" for="status">Статус</label>
+      <select class="form-select" id="status" name="status">
+        <option value="">Будь-який</option>
+        {% for s in ('alive', 'dead', 'unknown') %}
+          <option value="{{ s }}" {{ 'selected' if fields.status.lower() == s }}>{{ s|capitalize }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 col-6">
+      <label class="form-label" for="species">Вид</label>
+      <input class="form-control" id="species" name="species" value="{{ fields.species }}" placeholder="Human, Alien…">
+    </div>
+    <div class="col-md-2 col-6">
+      <label class="form-label" for="gender">Стать</label>
+      <select class="form-select" id="gender" name="gender">
+        <option value="">Будь-яка</option>
+        {% for g in ('female', 'male', 'genderless', 'unknown') %}
+          <option value="{{ g }}" {{ 'selected' if fields.gender.lower() == g }}>{{ g|capitalize }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 col-6 d-grid">
+      <button class="btn btn-success" type="submit"><i class="bi bi-search"></i> Знайти</button>
+    </div>
+  </div>
+</form>
+
+{% if results is not none %}
+  {% if results %}
+    <p class="text-secondary">Знайдено: <strong>{{ count }}</strong> · Сторінка {{ page }} з {{ pages }}</p>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+      {% for c in results %}
+        <div class="col">
+          {% include "_card.html" %}
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if pages > 1 %}
+    <nav class="mt-4" aria-label="Сторінки">
+      <ul class="pagination justify-content-center">
+        <li class="page-item {{ 'disabled' if page <= 1 }}">
+          <a class="page-link" href="{{ url_for('index', page=page-1, **query_args) }}">&laquo; Назад</a>
+        </li>
+        <li class="page-item disabled"><span class="page-link">{{ page }} / {{ pages }}</span></li>
+        <li class="page-item {{ 'disabled' if page >= pages }}">
+          <a class="page-link" href="{{ url_for('index', page=page+1, **query_args) }}">Далі &raquo;</a>
+        </li>
+      </ul>
+    </nav>
+    {% endif %}
+  {% else %}
+    <div class="text-center text-secondary py-5">
+      <i class="bi bi-emoji-frown display-4"></i>
+      <p class="mt-3">Нічого не знайдено.</p>
+    </div>
+  {% endif %}
+{% endif %}
+{% endblock %}

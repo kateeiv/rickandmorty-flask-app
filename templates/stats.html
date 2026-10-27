@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Аналіз колекції — Rick and Morty{% endblock %}
+{% block content %}
+<h2 class="portal-text mb-4">Аналіз збережених персонажів</h2>
+
+{% if summary.total == 0 %}
+  <div class="text-center text-secondary py-5">
+    <i class="bi bi-bar-chart display-4"></i>
+    <p class="mt-3">Колекція порожня — немає даних для аналізу.
+      <a href="{{ url_for('index') }}">Додайте персонажів</a>.</p>
+  </div>
+{% else %}
+  <div class="row g-3 mb-4 text-center">
+    <div class="col-6 col-md-3"><div class="card card-body"><div class="fs-2 text-success">{{ summary.total }}</div><div class="small text-secondary">Персонажів</div></div></div>
+    <div class="col-6 col-md-3"><div class="card card-body"><div class="fs-2 text-success">{{ summary.by_status.get('Alive', 0) }}</div><div class="small text-secondary">Живих</div></div></div>
+    <div class="col-6 col-md-3"><div class="card card-body"><div class="fs-2 text-danger">{{ summary.by_status.get('Dead', 0) }}</div><div class="small text-secondary">Померлих</div></div></div>
+    <div class="col-6 col-md-3"><div class="card card-body"><div class="fs-2 text-info">{{ summary.avg_episodes }}</div><div class="small text-secondary">Сер. епізодів</div></div></div>
+  </div>
+  <div class="row g-4">
+    <div class="col-md-6"><img class="img-fluid rounded" alt="Статуси" src="data:image/png;base64,{{ charts.status }}"></div>
+    <div class="col-md-6"><img class="img-fluid rounded" alt="Види" src="data:image/png;base64,{{ charts.species }}"></div>
+    <div class="col-12"><img class="img-fluid rounded" alt="Епізоди" src="data:image/png;base64,{{ charts.episodes }}"></div>
+  </div>
+{% endif %}
+{% endblock %}

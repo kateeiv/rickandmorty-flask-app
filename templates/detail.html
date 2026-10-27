@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ c.name }} — Rick and Morty{% endblock %}
+{% block content %}
+<div class="card mx-auto" style="max-width: 820px">
+  <div class="row g-0">
+    <div class="col-md-5"><img src="{{ c.image }}" class="img-fluid rounded-start w-100" alt="{{ c.name }}"></div>
+    <div class="col-md-7">
+      <div class="card-body">
+        <h3 class="card-title portal-text">{{ c.name }}</h3>
+        <span class="badge text-bg-{{ c.status|status_class }} mb-3">{{ c.status }}</span>
+        <dl class="row mb-3">
+          <dt class="col-5">Вид</dt><dd class="col-7">{{ c.species }}</dd>
+          <dt class="col-5">Тип</dt><dd class="col-7">{{ c.type or '—' }}</dd>
+          <dt class="col-5">Стать</dt><dd class="col-7">{{ c.gender }}</dd>
+          <dt class="col-5">Походження</dt><dd class="col-7">{{ c.origin }}</dd>
+          <dt class="col-5">Поточна локація</dt><dd class="col-7">{{ c.location }}</dd>
+          <dt class="col-5">Епізодів</dt><dd class="col-7">{{ c.episode_count }}</dd>
+          <dt class="col-5">ID (API / локальний)</dt><dd class="col-7">{{ c.external_id }} / {{ c.id }}</dd>
+          <dt class="col-5">Збережено</dt><dd class="col-7">{{ c.saved_at }}</dd>
+          <dt class="col-5">Нотатка</dt><dd class="col-7">{{ c.note or '—' }}</dd>
+        </dl>
+        <a class="btn btn-outline-secondary" href="{{ url_for('saved') }}"><i class="bi bi-arrow-left"></i> До списку</a>
+        <a class="btn btn-info" href="{{ url_for('edit', char_id=c.id) }}"><i class="bi bi-pencil"></i> Редагувати</a>
+        <form class="d-inline" method="post" action="{{ url_for('delete', char_id=c.id) }}"
+              onsubmit="return confirm('Видалити цього персонажа?')">
+          <button class="btn btn-outline-danger"><i class="bi bi-trash"></i> Видалити</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

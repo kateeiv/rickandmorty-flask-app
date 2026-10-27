@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Моя колекція — Rick and Morty{% endblock %}
+{% block content %}
+<h2 class="portal-text mb-3">Моя колекція <span class="badge text-bg-success align-middle fs-6">{{ characters|length }}</span></h2>
+
+<form class="card card-body mb-4" method="get" action="{{ url_for('saved') }}">
+  <div class="row g-3 align-items-end">
+    <div class="col-lg-3">
+      <label class="form-label" for="q">Пошук</label>
+      <input class="form-control" id="q" name="q" value="{{ filters.q }}" placeholder="Ім'я, локація, нотатка…">
+    </div>
+    <div class="col-lg-2 col-6">
+      <label class="form-label" for="status">Статус</label>
+      <select class="form-select" id="status" name="status">
+        <option value="">Усі</option>
+        {% for s in statuses %}<option {{ 'selected' if filters.status|lower == s|lower }}>{{ s }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-lg-2 col-6">
+      <label class="form-label" for="species">Вид</label>
+      <select class="form-select" id="species" name="species">
+        <option value="">Усі</option>
+        {% for s in species_list %}<option {{ 'selected' if filters.species|lower == s|lower }}>{{ s }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-lg-2 col-6">
+      <label class="form-label" for="gender">Стать</label>
+      <select class="form-select" id="gender" name="gender">
+        <option value="">Усі</option>
+        {% for g in genders %}<option {{ 'selected' if filters.gender|lower == g|lower }}>{{ g }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="col-lg-2 col-6">
+      <label class="form-label" for="sort">Сортування</label>
+      <div class="input-group">
+        <select class="form-select" id="sort" name="sort">
+          {% for f in sort_fields %}<option value="{{ f }}" {{ 'selected' if sort == f }}>{{ f }}</option>{% endfor %}
+        </select>
+        <select class="form-select" name="order" style="max-width:5.5rem">
+          <option value="asc" {{ 'selected' if order == 'asc' }}>↑</option>
+          <option value="desc" {{ 'selected' if order == 'desc' }}>↓</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-lg-1 d-grid">
+      <button class="btn btn-success" title="Застосувати"><i class="bi bi-funnel"></i></button>
+    </div>
+  </div>
+</form>
+
+{% if characters %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr><th></th><th>Ім'я</th><th>Статус</th><th>Вид</th><th>Походження</th><th>Локація</th><th>Збережено</th><th class="text-end">Дії</th></tr>
+      </thead>
+      <tbody>
+      {% for c in characters %}
+        <tr>
+          <td><img src="{{ c.image }}" alt="" class="avatar" loading="lazy"></td>
+          <td><a class="link-success fw-semibold" href="{{ url_for('detail', char_id=c.id) }}">{{ c.name }}</a></td>
+          <td><span class="badge text-bg-{{ c.status|status_class }}">{{ c.status }}</span></td>
+          <td>{{ c.species }}</td>
+          <td>{{ c.origin }}</td>
+          <td>{{ c.location }}</td>
+          <td class="small text-secondary">{{ c.saved_at }}</td>
+          <td class="text-end text-nowrap">
+            <a class="btn btn-outline-info btn-sm" href="{{ url_for('edit', char_id=c.id) }}" title="Редагувати"><i class="bi bi-pencil"></i></a>
+            <form class="d-inline" method="post" action="{{ url_for('delete', char_id=c.id) }}"
+                  onsubmit="return confirm('Видалити «{{ c.name|e }}» з колекції?')">
+              <button class="btn btn-outline-danger btn-sm" title="Видалити"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="text-center text-secondary py-5">
+    <i class="bi bi-inbox display-4"></i>
+    <p class="mt-3">Записів не знайдено.
+      {% if not (filters.q or filters.status or filters.species or filters.gender) %}
+        <a href="{{ url_for('index') }}">Знайдіть персонажів</a> і збережіть їх.
+      {% endif %}
+    </p>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Редагування — {{ c.name }}{% endblock %}
+{% block content %}
+<div class="card mx-auto" style="max-width: 720px">
+  <div class="card-body">
+    <h3 class="portal-text mb-3">Редагування персонажа <small class="text-secondary">#{{ c.external_id }}</small></h3>
+    <form method="post" action="{{ url_for('edit', char_id=c.id) }}">
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label" for="name">Ім'я *</label>
+          <input class="form-control" id="name" name="name" value="{{ c.name }}" required maxlength="200">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="status">Статус *</label>
+          <select class="form-select" id="status" name="status">
+            {% for s in statuses %}<option {{ 'selected' if c.status == s }}>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="species">Вид *</label>
+          <input class="form-control" id="species" name="species" value="{{ c.species }}" required maxlength="200">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="type">Тип</label>
+          <input class="form-control" id="type" name="type" value="{{ c.type }}" maxlength="200">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label" for="gender">Стать</label>
+          <select class="form-select" id="gender" name="gender">
+            {% for g in genders %}<option {{ 'selected' if c.gender == g }}>{{ g }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="origin">Походження</label>
+          <input class="form-control" id="origin" name="origin" value="{{ c.origin }}" maxlength="200">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="location">Поточна локація</label>
+          <input class="form-control" id="location" name="location" value="{{ c.location }}" maxlength="200">
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="image">URL зображення</label>
+          <input class="form-control" id="image" name="image" value="{{ c.image }}" maxlength="500">
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="note">Нотатка</label>
+          <textarea class="form-control" id="note" name="note" rows="3" maxlength="1000">{{ c.note }}</textarea>
+        </div>
+      </div>
+      <div class="mt-4">
+        <button class="btn btn-success"><i class="bi bi-check2"></i> Зберегти</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('detail', char_id=c.id) }}">Скасувати</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
